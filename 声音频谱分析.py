@@ -1,5 +1,4 @@
 # -*- coding: cp936 -*-
-from pylab import *
 import pygame
 import numpy as np
 

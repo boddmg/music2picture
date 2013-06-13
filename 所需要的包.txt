@@ -1,0 +1,4 @@
+fr0stlib（自行拷到X:\Python27\Lib中）
+numpy
+matplotlib
+pygame
