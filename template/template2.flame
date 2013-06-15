@@ -1,0 +1,3 @@
+<flames version="Fr0st 1.4">
+<flame name="Apo7X-130613-242" size="808 748" center="0.0597867439751 -0.362083586187" scale="293.264062391" background="0 0 0" estimator_curve="0.4" oversample="1" curves="0 0 1 0 0 1 1 1 1 1 1 1 0 0 1 0 0 1 1 1 1 1 1 1 0 0 1 0 0 1 1 1 1 1 1 1 0 0 1 0 0 1 1 1 1 1 1 1" highlight_power="-1" plugins="" gamma_threshold="0.01" quality="1" filter="0.2" estimator_radius="9" version="Fr0st 1.4" interpolation="linear" enable_de="0" estimator_minimum="0" vibrancy="1" rotate="0" brightness="4" palette_mode="linear" new_linear="1" interpolation_type="log" time="0" gamma="4" >
+</flame></flames>
