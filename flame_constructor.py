@@ -50,7 +50,7 @@ def findkey(subarray):
     fftls=list(abs(fft))
     maxffts=max(fftls)
     maxfttsFrequency=fftx[fftls.index(maxffts)]
-    return maxfttsFrequency/20000.0
+    return maxfttsFrequency
 
 def render(flame_string,level):
     c=wx.App()
@@ -86,6 +86,20 @@ def addColorElement(flame,index,hue):
     return flame
 
 if __name__ == '__main__':
+
+    print "开始分析音乐特征....."
+    musicSliceNum=256
+    musicInfo=[]
+    soundArray=getAudio("sample.wav")[44100:-44100]
+    for time in range(0,soundArray.size/musicSliceNum*musicSliceNum,soundArray.size/musicSliceNum):
+        subsoundArray=soundArray[time:time+soundArray.size/musicSliceNum]
+        musicInfo.append(findkey(subsoundArray))
+    musicInfo=[e/2000 for e in musicInfo]
+    seed(getHash(musicInfo))        #设置利用音乐特征设置随机种子
+    print "分析音乐特征完成！"
+
+    
+    print "开始渲染图像....."
     flameDom=minidom.parseString(file("template/template2.flame").read())
     flame=flameDom.getElementsByTagName('flame')[0]
 
@@ -94,18 +108,10 @@ if __name__ == '__main__':
     flame=addXfromElement(flame,xform_const2)
 
     for i in range(256):
-        flame=addColorElement(flame,i,i/255.0)
+        flame=addColorElement(flame,i,musicInfo[i])
     
     flameDom.replaceChild(flame,flame)
     xml=flameDom.toprettyxml()[22:]
-    file("a.flame",'w').write(xml)
     render(xml,100)
-    '''
-    musicInfo=[]
-    soundArray=getAudio("升key.wav")
-    for time in range(0,soundArray.size/255*255,soundArray.size/255):
-        subsoundArray=soundArray[time:time+soundArray.size/255]
-        musicInfo.append(findkey(subsoundArray))
-    seed(getHash(musicInfo))
-    print random()
-    '''
+    print "渲染图像完成！"
+
