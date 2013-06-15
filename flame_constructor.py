@@ -3,11 +3,9 @@ import fr0stlib
 import xml.etree.cElementTree as etree
 from fr0stlib.render import *
 from xml.dom import minidom
-import pygame
+import pygame,hashlib,colorsys,sys,os
 import numpy as np
-import hashlib
 from random import *
-import colorsys
 
 xform_const1=[['opacity','1.0'],
              ['weight','0.33333'],
@@ -52,7 +50,7 @@ def findkey(subarray):
     maxfttsFrequency=fftx[fftls.index(maxffts)]
     return maxfttsFrequency
 
-def render(flame_string,level):
+def render(flame_string,level,parentPath):
     c=wx.App()
     
     tree = etree.fromstring(flame_string)
@@ -60,7 +58,7 @@ def render(flame_string,level):
 
     a=flam3_render(flame,[640,480],level)
     b=wx.BitmapFromBuffer(640,480,a)
-    save_image("a.jpg",b)
+    save_image(parentPath+"\\output.jpg",b)
     
 def addXfromElement(flame,fromconst):
     xform=minidom.getDOMImplementation().createDocument(None, 'catalog', None).createElement('xform')
@@ -86,13 +84,16 @@ def addColorElement(flame,index,hue):
     return flame
 
 if __name__ == '__main__':
-
+    
+    parentPath=os.path.split(sys.argv[0])[0]
+    
     print "开始分析音乐特征....."
-    musicSliceNum=256
     musicInfo=[]
-    soundArray=getAudio("sample.wav")[44100:-44100]
-    for time in range(0,soundArray.size/musicSliceNum*musicSliceNum,soundArray.size/musicSliceNum):
-        subsoundArray=soundArray[time:time+soundArray.size/musicSliceNum]
+    soundArray=getAudio(sys.argv[1])[44100:-44100]
+    musicSliceNum=256
+    musicSliceSize=soundArray.size/musicSliceNum
+    for time in range(musicSliceNum):
+        subsoundArray=soundArray[time*musicSliceSize:musicSliceSize+time*musicSliceSize]
         musicInfo.append(findkey(subsoundArray))
     musicInfo=[e/2000 for e in musicInfo]
     seed(getHash(musicInfo))        #设置利用音乐特征设置随机种子
@@ -100,7 +101,8 @@ if __name__ == '__main__':
 
     
     print "开始渲染图像....."
-    flameDom=minidom.parseString(file("template/template2.flame").read())
+
+    flameDom=minidom.parseString(file(parentPath+"\\template\\template2.flame").read())
     flame=flameDom.getElementsByTagName('flame')[0]
 
     flame=addXfromElement(flame,xform_const1)
@@ -112,6 +114,6 @@ if __name__ == '__main__':
     
     flameDom.replaceChild(flame,flame)
     xml=flameDom.toprettyxml()[22:]
-    render(xml,100)
+    render(xml,100,parentPath)
     print "渲染图像完成！"
 
