@@ -1,4 +1,3 @@
-fr0stlib（自行拷到X:\Python27\Lib中）
-numpy
-matplotlib
-pygame
+fr0stlib(自带了)
+numpy 1.7.1 or later
+pygame 1.9.1 or later
