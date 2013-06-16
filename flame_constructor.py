@@ -50,15 +50,14 @@ def findkey(subarray):
     maxfttsFrequency=fftx[fftls.index(maxffts)]
     return maxfttsFrequency
 
-def render(flame_string,level,parentPath):
-    c=wx.App()
-    
+def render(flame_string,level,path):
+  
     tree = etree.fromstring(flame_string)
     flame=[fr0stlib.Flame().from_element(e) for e in tree.findall('flame')][0]
 
     a=flam3_render(flame,[640,480],level)
     b=wx.BitmapFromBuffer(640,480,a)
-    save_image(parentPath+"\\output.jpg",b)
+    save_image(path,b)
     
 def addXfromElement(flame,fromconst):
     xform=minidom.getDOMImplementation().createDocument(None, 'catalog', None).createElement('xform')
@@ -83,37 +82,64 @@ def addColorElement(flame,index,hue):
     flame.appendChild(color)
     return flame
 
-if __name__ == '__main__':
-    
+def getMusicFilePath():
+    dialog = wx.FileDialog(None, message="选择要转换的音乐", defaultDir="", 
+        defaultFile="", wildcard="Music (*.wav;*.mp3)|*.wav;*.mp3|All files (*.*)|*.*", style=0, 
+        pos=wx.DefaultPosition)
+    if dialog.ShowModal() == wx.ID_OK:
+        path=dialog.GetPath()
+    else:
+        path=False
+    dialog.Destroy()
+    return path
+
+def getImageFilePath():
+    dialog = wx.FileDialog(None, message="选择转换图像保存的路径", defaultDir="", 
+        defaultFile="", wildcard="Image (*.jpg)|*.jpg", style=wx.SAVE, 
+        pos=wx.DefaultPosition)
+    if dialog.ShowModal() == wx.ID_OK:
+        path=dialog.GetPath()
+        if path[-4] !=".":
+            path=path+".jpg"
+    else:
+        path=False
+    dialog.Destroy()
+    return path
+
+if __name__ == '__main__':    
+    wxapp=wx.App()
     parentPath=os.path.split(sys.argv[0])[0]
-    
-    print "开始分析音乐特征....."
-    musicInfo=[]
-    soundArray=getAudio(sys.argv[1])[44100:-44100]
-    musicSliceNum=256
-    musicSliceSize=soundArray.size/musicSliceNum
-    for time in range(musicSliceNum):
-        subsoundArray=soundArray[time*musicSliceSize:musicSliceSize+time*musicSliceSize]
-        musicInfo.append(findkey(subsoundArray))
-    musicInfo=[e/2000 for e in musicInfo]
-    seed(getHash(musicInfo))        #设置利用音乐特征设置随机种子
-    print "分析音乐特征完成！"
+    musicPath=getMusicFilePath()
+    imagePath=getImageFilePath()
+    #判断路径是否正常
+    if musicPath and imagePath:
+        print "开始分析音乐特征....."
+        musicInfo=[]
+        soundArray=getAudio(musicPath)[44100:-44100]
+        musicSliceNum=256
+        musicSliceSize=soundArray.size/musicSliceNum
+        for time in range(musicSliceNum):
+            subsoundArray=soundArray[time*musicSliceSize:musicSliceSize+time*musicSliceSize]
+            musicInfo.append(findkey(subsoundArray))
+        musicInfo=[e/2000 for e in musicInfo]
+        seed(getHash(musicInfo))        #设置利用音乐特征设置随机种子
+        print "分析音乐特征完成！"
 
-    
-    print "开始渲染图像....."
+        
+        print "开始渲染图像....."
 
-    flameDom=minidom.parseString(file(parentPath+"\\template\\template2.flame").read())
-    flame=flameDom.getElementsByTagName('flame')[0]
+        flameDom=minidom.parseString(file(parentPath+"\\template\\template2.flame").read())
+        flame=flameDom.getElementsByTagName('flame')[0]
 
-    flame=addXfromElement(flame,xform_const1)
-    flame=addXfromElement(flame,xform_const2)
-    flame=addXfromElement(flame,xform_const2)
+        flame=addXfromElement(flame,xform_const1)
+        flame=addXfromElement(flame,xform_const2)
+        flame=addXfromElement(flame,xform_const2)
 
-    for i in range(256):
-        flame=addColorElement(flame,i,musicInfo[i])
-    
-    flameDom.replaceChild(flame,flame)
-    xml=flameDom.toprettyxml()[22:]
-    render(xml,100,parentPath)
-    print "渲染图像完成！"
+        for i in range(256):
+            flame=addColorElement(flame,i,musicInfo[i])
+        
+        flameDom.replaceChild(flame,flame)
+        xml=flameDom.toprettyxml()[22:]
+        render(xml,100,imagePath)
+        print "渲染图像完成！"
 
