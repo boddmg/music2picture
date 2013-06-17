@@ -1,11 +1,13 @@
 # -*- coding: cp936 -*-
 import fr0stlib
+import xml.etree.ElementTree
 import xml.etree.cElementTree as etree
 from fr0stlib.render import *
 from xml.dom import minidom
 import pygame,hashlib,colorsys,sys,os
 import numpy as np
 from random import *
+import wave
 
 xform_const1=[['opacity','1.0'],
              ['weight','0.33333'],
@@ -27,9 +29,13 @@ def getHash(data):
     return int(hashlib.new("md5", str(data)).hexdigest(),16)
 
 def getAudio(path):
-    pygame.mixer.init(44100,8,1,4096)
-    audioData=pygame.sndarray.array(pygame.mixer.Sound(path))
-    pygame.mixer.quit()
+    audioData=wave.open(path)
+    audioData=audioData.readframes(audioData.getnframes())
+    audioData=np.fromstring(audioData, dtype=np.short)
+    audioData.shape = -1, 2
+    audioData = audioData.T
+    audioData=audioData[0]
+    print len(audioData)
     return audioData
 
 def findkey(subarray):
